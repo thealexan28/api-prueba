@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from mcp.server.fastmcp import FastMCP
 from mcp.types import CallToolResult, TextContent
+from mcp.server.transport_security import TransportSecuritySettings
 
 
 # ============================================================
@@ -16,9 +17,25 @@ from mcp.types import CallToolResult, TextContent
 
 mcp = FastMCP(
     name="Asistente Unicaja MCP",
+    host="0.0.0.0",
     stateless_http=True,
     json_response=True,
-    streamable_http_path="/",
+    streamable_http_path="/mcp",
+    transport_security=TransportSecuritySettings(
+        enable_dns_rebinding_protection=True,
+        allowed_hosts=[
+            "api-prueba-l1sn.onrender.com",
+            "api-prueba-l1sn.onrender.com:*",
+            "localhost:*",
+            "127.0.0.1:*",
+        ],
+        allowed_origins=[
+            "https://chatgpt.com",
+            "https://chat.openai.com",
+            "http://localhost:*",
+            "http://127.0.0.1:*",
+        ],
+    ),
 )
 
 
@@ -281,4 +298,4 @@ def consultas_hipotecas(body: PreguntaRequest):
 # 6. Montar MCP en /mcp
 # ============================================================
 
-app.mount("/mcp", mcp.streamable_http_app())
+app.mount("/", mcp.streamable_http_app())
